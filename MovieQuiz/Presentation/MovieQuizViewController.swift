@@ -7,6 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     @IBOutlet private var numberQuestion: UILabel!
     @IBOutlet private var yesButton: UIButton!
     @IBOutlet private var noButton: UIButton!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     private var correctAnswers: Int = 0
     private var questionFactory: QuestionFactoryProtocol?
@@ -24,12 +25,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
-        
+        alertPresenter = AlertPresenter(delegate: self)
         statisticService = StatisticServiceImplementation(userDefaults: UserDefaults.standard, decoder: JSONDecoder(), encoder: JSONEncoder()
         )
-        alertPresenter = AlertPresenter(delegate: self)
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -41,6 +42,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         currentQuestion = question
         let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
+            self?.hideLoadingIndicator()
             self?.show(quiz: viewModel)
         }
     }
@@ -58,6 +60,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                         buttonText: result.buttonText,
                         completion: { [weak self] in
                             guard let self = self else { return }
+                            
                             self.presenter.resetQuestionIndex()
                             self.correctAnswers = 0
                             self.questionFactory?.requestNextQuestion()
@@ -87,6 +90,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         if presenter.isLastQuestion() {
             showResults()
         } else {
+            showLoadingIndicator()
             presenter.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
             resetBorder()
@@ -103,7 +107,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                 return
             }
             
-            let text = "Ваш результат: \(correctAnswers)/10\nКоличество сыгранных раундов: \(statisticService.gamesCount)\nРекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))% "
+            let text = """
+                    Ваш результат: \(correctAnswers)/10
+                    Количество сыгранных раундов: \(statisticService.gamesCount)
+                    Рекорд: \(bestGame.correct)/10 (\(bestGame.date.dateTimeString))
+                    Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+                    """
             
             let alertModel = AlertModel(
                 title: "Этот раунд окончен!",
@@ -119,6 +128,43 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             
             self.alertPresenter?.presentAlert(model: alertModel)
         }
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let alertModel = AlertModel(
+                    title: "Что-то пошло не так(",
+                    message: message,
+                    buttonText: "Попробовать еще раз") { [weak self] in
+                        guard let self = self else { return }
+                        
+                        self.presenter.resetQuestionIndex()
+                        self.correctAnswers = 0
+                        self.questionFactory?.loadData()
+                        self.resetBorder()
+                    }
+                        
+        self.alertPresenter?.presentAlert(model: alertModel)
+    }
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
     }
     
     private func resetBorder() {
