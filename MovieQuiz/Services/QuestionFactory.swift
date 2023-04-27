@@ -51,7 +51,7 @@ class QuestionFactory: QuestionFactoryProtocol {
             let rating = Float(movie.rating) ?? 0
             
             let greaterOrLess = Bool.random()
-            let randomRating = Int.random(in: 1...10)
+            let randomRating = Int.random(in: 2...9)
             
             let text = "Рейтинг этого фильма " + (greaterOrLess ? "больше" : "меньше") + " чем \(randomRating)?"
             let correctAnswer = greaterOrLess ? rating > Float(randomRating) : rating < Float(randomRating)
