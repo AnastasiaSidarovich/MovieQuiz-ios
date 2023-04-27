@@ -124,17 +124,23 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="ALG-hY-f3f">
+                                <rect key="frame" x="177.66666666666666" y="396" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="ypBlack"/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="KJp-Vc-2Km" secondAttribute="bottom" id="D3O-K0-aXV"/>
+                            <constraint firstItem="ALG-hY-f3f" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Dtt-Q6-FmT"/>
+                            <constraint firstItem="ALG-hY-f3f" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="W9u-OZ-z9A"/>
                             <constraint firstItem="KJp-Vc-2Km" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="aO4-Y8-6Yq"/>
                             <constraint firstItem="KJp-Vc-2Km" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="pwo-Xg-YOc"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="KJp-Vc-2Km" secondAttribute="trailing" constant="20" id="t7T-Fa-52M"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="ALG-hY-f3f" id="9qZ-NE-wzg"/>
                         <outlet property="imageView" destination="Ymr-fp-vBu" id="B0x-hE-xLe"/>
                         <outlet property="noButton" destination="ZHI-50-nG7" id="Yet-by-Nu5"/>
                         <outlet property="numberQuestion" destination="bMo-Da-V3d" id="n6K-O7-5gO"/>
