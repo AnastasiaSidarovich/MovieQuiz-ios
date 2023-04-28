@@ -10,7 +10,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     private var alertPresenter: AlertPresenterProtocol?
-    private var presenter: MovieQuizPresenter!
+    private var presenter: QuestionFactoryDelegate?
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -23,6 +23,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
         
         presenter = MovieQuizPresenter(viewController: self)
         alertPresenter = AlertPresenter(delegate: self)
+        activityIndicator.hidesWhenStopped = true
         showLoadingIndicator()
     }
     
@@ -40,7 +41,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
                         completion: { [weak self] in
                             guard let self = self else { return }
                             
-                            self.presenter.restartGame()
+                            self.presenter?.restartGame()
                             self.resetBorder()
                             }
                         )
@@ -55,14 +56,17 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
     }
     
     func showResults() {
-        let text = presenter.makeResultMessage()
+        guard let text = presenter?.makeResultMessage() else {
+                return
+        }
+        
         let alertModel = AlertModel(
             title: "Этот раунд окончен!",
             message: text,
             buttonText: "Сыграть ещё раз") { [weak self] in
                 guard let self = self else {return}
                     
-                self.presenter.restartGame()
+                self.presenter?.restartGame()
                 self.resetBorder()
             }
             
@@ -71,12 +75,10 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
     }
     
     func showLoadingIndicator() {
-        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
         activityIndicator.stopAnimating()
     }
     
@@ -89,7 +91,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
                     buttonText: "Попробовать еще раз") { [weak self] in
                         guard let self = self else { return }
                         
-                        self.presenter.restartGame()
+                        self.presenter?.restartGame()
                         self.resetBorder()
                     }
                         
@@ -112,10 +114,10 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, M
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        presenter.yesButtonClicked()
+        presenter?.yesButtonClicked()
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.noButtonClicked()
+        presenter?.noButtonClicked()
     }
 }
