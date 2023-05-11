@@ -16,12 +16,17 @@ class AlertPresenter: AlertPresenterProtocol {
         self.delegate = delegate
     }
     
-    func presentAlert(model: AlertModel) {
+    func presentAlert(model: AlertModel, accessibilityIdentifier: String? = nil) {
         let alert = UIAlertController(title: model.title, message: model.message, preferredStyle: .alert)
+        
         let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion?()
         }
         alert.addAction(action)
         delegate?.present(alert, animated: true, completion: nil)
+        
+        if let identifier = accessibilityIdentifier {
+            alert.view.accessibilityIdentifier = identifier
+        }
     }
 }
